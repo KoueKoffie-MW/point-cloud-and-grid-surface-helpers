@@ -1,0 +1,14 @@
+Open Git Bash - NOTE: To paste in Git Bash Use Shift+Insert instead of Ctrl+v
+ 
+type 'git lfs install'
+Should get 'Git LFS Initialized'
+ 
+Browse to a directory where you want to clone to, in this example let's use 'c:/git/PC_GS_SSMB'
+type 'cd c:/git/PC_GS_SSMB'
+
+Set up yout account (If you have not done this before):
+git config --global user.name "Your Name"
+git config --global user.email "youremail@mail.com"
+ 
+Clone Repo:
+Type 'git clone https://insidelabs-git.mathworks.com/jjansev/point-cloud-and-grid-surface-helpers.git'

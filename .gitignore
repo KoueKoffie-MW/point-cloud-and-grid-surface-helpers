@@ -7,32 +7,5 @@
 # Simulink compile directory
 Compile_artifacts/
 
-# Infineon Hardware demo and oneeye
-Heterogenous_Multicore_EmbeddedAI/
-
-# Unreal Engine 5.11 .gitignore template
-# Standard gitignore for Unreal Engine
-###################
-# Derived Data Cache and Intermediate Build Files
-UnrealProject/DerivedDataCache/
-UnrealProject/Intermediate/
-UnrealProject/Saved/
-
-# Binary files
-UnrealProject/Binaries/
-UnrealProject/.vs/
-
-# Build output folder
-UnrealProject/Build/
-
-# Compiled EXE folder exclusions
-Compiled_Unreal_EXE/AutoVrtlEnv/Saved/Config/CrashReportClient/
-Compiled_Unreal_EXE/AutoVrtlEnv/Saved/Logs/
-
-Compiled_Unreal_EXE_4p27/
-Compiled_Unreal_EXE_noInje_noNS/
-Compiled_Unreal_EXE_new
-Compiled_newnew
-
-# Videos folder used for video processing on YT videos
+# Videos folder
 Videos
