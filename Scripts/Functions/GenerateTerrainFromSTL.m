@@ -1,4 +1,4 @@
-function [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(stlFileName, resolution, x_query, y_query)
+function [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(stlFileName, resolution, x_query, y_query, Int_method)
     % GenerateTerrainFromSTL Processes an STL file to generate a surface object with specified resolution.
     %
     %   [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(stlFileName, resolution, x_query, y_query)
@@ -50,7 +50,16 @@ function [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(s
     [XI, YI] = meshgrid(xi, yi);
     
     % Interpolate the Z data
-    ZI = griddata(x_filtered, y_filtered, z_filtered, XI, YI, 'linear');
+    % tic
+    ZI = griddata(x_filtered, y_filtered, z_filtered, XI, YI, Int_method);
+    % toc
+% "linear"	
+% "nearest"	
+% "natural"	
+% "cubic"	
+% "v4"	
+
+
     ZI(isnan(ZI)) = 0; % Replace all NaN with 0
     
     % Interpolate the z-heights at the query points
