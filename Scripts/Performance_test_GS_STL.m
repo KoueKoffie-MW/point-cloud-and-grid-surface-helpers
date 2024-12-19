@@ -2,8 +2,8 @@
 
 % Define parameters
 N = 5; % Number of times to run each simulation
-Lower_res = 1.5; % Lower bound of the parameter range
-Upper_res = 7; % Upper bound of the parameter range
+Lower_res = 3.5; % Lower bound of the parameter range
+Upper_res = 10; % Upper bound of the parameter range
 Steps = 30; % Number of steps between Lower_res and Upper_res
 
 % Calculate the step size
