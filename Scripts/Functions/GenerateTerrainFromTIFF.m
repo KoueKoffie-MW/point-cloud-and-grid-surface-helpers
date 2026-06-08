@@ -1,4 +1,8 @@
-function [imageMatrix, xi, yi, ZI, z_query] = GenerateTerrainFromTIFF(tiffFileName, resolution, x_query, y_query)
+function [imageMatrix, xi, yi, ZI, z_query] = GenerateTerrainFromTIFF(tiffFileName, resolution, x_query, y_query, generateImage)
+
+    if nargin < 5
+        generateImage = true;
+    end
     % GenerateTerrainFromTIFF Processes a TIFF file (e.g. DEM) to generate a surface.
     %
     %   [imageMatrix, xi, yi, ZI, z_query] = GenerateTerrainFromTIFF(tiffFileName, resolution, x_query, y_query)
@@ -39,23 +43,29 @@ function [imageMatrix, xi, yi, ZI, z_query] = GenerateTerrainFromTIFF(tiffFileNa
     % Interpolate z-heights at the query points
     z_query = interp2(XI, YI, ZI, x_query, y_query);
 
-    % === Visualization (hidden figure) ===
-    fig = figure('Visible', 'off', 'Color', 'white');
-    hold on;
+    if generateImage
+        % === Visualization (hidden figure) ===
+        fig = figure('Visible', 'off', 'Color', 'white');
+        hold on;
 
-    % Plot the surface
-    surf(XI, YI, ZI, 'EdgeColor', 'none', 'LineStyle', 'none');
-    axis equal;
-    axis off;
+        % Plot the surface
+        surf(XI, YI, ZI, 'EdgeColor', 'none', 'LineStyle', 'none');
+        axis equal;
+        axis off;
 
-    % Isometric view
-    view(45, 35.26);
+        % Isometric view
+        view(45, 35.26);
 
-    % Plot query points
-    plot3(x_query, y_query, z_query, 'ro', 'MarkerSize', 12, 'MarkerFaceColor', 'r');
+        % Plot query points
+        plot3(x_query, y_query, z_query, 'ro', 'MarkerSize', 12, 'MarkerFaceColor', 'r');
 
-    % Capture image
-    frame = getframe(fig);
-    imageMatrix = frame.cdata;
-    close(fig);
+        % Capture image
+        frame = getframe(fig);
+        imageMatrix = frame.cdata;
+        close(fig);
+    else
+        if ~exist('imageMatrix','var')
+            imageMatrix = [];
+        end
+    end
 end

@@ -10,3 +10,6 @@ CompileArtifacts/
 
 # Videos folder
 Videos
+
+# Surface cache (generated .mat files)
+Cache/

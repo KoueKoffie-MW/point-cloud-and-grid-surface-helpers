@@ -1,4 +1,8 @@
-function imageMatrix = drawSplineContactVisualization(inputPoints, R, L, numDisks, drawStyle)
+function imageMatrix = drawSplineContactVisualization(inputPoints, R, L, numDisks, drawStyle, generateImage)
+
+    if nargin < 6
+        generateImage = true;
+    end
 % drawSplineContactVisualization  Creates a 4-view visualization of a spline with contact elements.
 %
 %   imageMatrix = drawSplineContactVisualization(inputPoints, R, L, numDisks, drawStyle)
@@ -39,66 +43,72 @@ function imageMatrix = drawSplineContactVisualization(inputPoints, R, L, numDisk
 
     common_xlim = [center(1) - halfRange, center(1) + halfRange];
     common_ylim = [center(2) - halfRange, center(2) + halfRange];
-    common_zlim = [center(3) - halfRange, center(3) + halfRange];
-
-    % --- Create figure ---
-    fig = figure('Visible', 'off', 'Color', 'white', ...
-                 'Units', 'pixels', 'Position', [100, 100, 1000, 1000]);
-
-    pointColor = [0.4667 0.6745 0.1882];
-    lineColor  = [0.4667 0.6745 0.1882];
-    diskColor  = [0.8500 0.3250 0.0980];   % Orange for disks/cylinder
-    titleFontSize = 28;
-
-    % --- Compute disk / cylinder positions ---
-    if strcmp(drawStyle, "disks")
-        diskCenters = computeDiskCentersAlongSpline(inputPoints, L, numDisks);
-    else % cylinder
-        diskCenters = []; % Not needed for cylinder mode
     end
 
-    % --- Create 4 views ---
-    views = { ...
-        struct('title','Top (X-Y)',     'view',[0 90],  'plane','xy'), ...
-        struct('title','Front (X-Z)',   'view',[0 0],   'plane','xz'), ...
-        struct('title','Side (Y-Z)',    'view',[90 0],  'plane','yz'), ...
-        struct('title','Perspective',   'view',[45 35.26], 'plane','3d') ...
-    };
+    if generateImage
+        % --- Create figure ---
+        fig = figure('Visible', 'off', 'Color', 'white', ...
+                     'Units', 'pixels', 'Position', [100, 100, 1000, 1000]);
 
-    for i = 1:4
-        ax = subplot(2,2,i);
-        hold(ax, 'on');
+        pointColor = [0.4667 0.6745 0.1882];
+        lineColor  = [0.4667 0.6745 0.1882];
+        diskColor  = [0.8500 0.3250 0.0980];   % Orange for disks/cylinder
+        titleFontSize = 28;
 
-        % Draw spline
-        plot3(ax, inputPoints(:,1), inputPoints(:,2), inputPoints(:,3), ...
-              'Color', lineColor, 'LineWidth', 1.5);
-
-        % Draw contact elements using 3D patches
+        % --- Compute disk / cylinder positions ---
         if strcmp(drawStyle, "disks")
-            drawOrientedDisks3D(ax, diskCenters, R, diskColor, inputPoints);
-        elseif strcmp(drawStyle, "cylinder")
-            drawCylinder3D(ax, inputPoints, R, diskColor);
-        elseif strcmp(drawStyle, "single_cylinder")
-            drawSingleCylinder3D(ax, inputPoints, R, L, diskColor);
+            diskCenters = computeDiskCentersAlongSpline(inputPoints, L, numDisks);
+        else % cylinder
+            diskCenters = []; % Not needed for cylinder mode
         end
 
-        % Formatting
-        view(ax, views{i}.view);
-        xlim(ax, common_xlim);
-        ylim(ax, common_ylim);
-        zlim(ax, common_zlim);
-        axis(ax, 'equal');
-        axis(ax, 'off');
-        title(ax, views{i}.title, 'FontSize', titleFontSize);
+        % --- Create 4 views ---
+        views = { ...
+            struct('title','Top (X-Y)',     'view',[0 90],  'plane','xy'), ...
+            struct('title','Front (X-Z)',   'view',[0 0],   'plane','xz'), ...
+            struct('title','Side (Y-Z)',    'view',[90 0],  'plane','yz'), ...
+            struct('title','Perspective',   'view',[45 35.26], 'plane','3d') ...
+        };
 
-        hold(ax, 'off');
+        for i = 1:4
+            ax = subplot(2,2,i);
+            hold(ax, 'on');
+
+            % Draw spline
+            plot3(ax, inputPoints(:,1), inputPoints(:,2), inputPoints(:,3), ...
+                  'Color', lineColor, 'LineWidth', 1.5);
+
+            % Draw contact elements
+            if strcmp(drawStyle, "disks")
+                drawOrientedDisks3D(ax, diskCenters, R, diskColor, inputPoints);
+            elseif strcmp(drawStyle, "cylinder")
+                drawCylinder3D(ax, inputPoints, R, diskColor);
+            elseif strcmp(drawStyle, "single_cylinder")
+                drawSingleCylinder3D(ax, inputPoints, R, L, diskColor);
+            end
+
+            % Formatting
+            view(ax, views{i}.view);
+            xlim(ax, common_xlim);
+            ylim(ax, common_ylim);
+            zlim(ax, common_zlim);
+            axis(ax, 'equal');
+            axis(ax, 'off');
+            title(ax, views{i}.title, 'FontSize', titleFontSize);
+
+            hold(ax, 'off');
+        end
+
+        % Capture image
+        drawnow;
+        frame = getframe(fig);
+        imageMatrix = frame.cdata;
+        close(fig);
+    else
+        if ~exist('imageMatrix','var')
+            imageMatrix = [];
+        end
     end
-
-    % Capture image
-    drawnow;
-    frame = getframe(fig);
-    imageMatrix = frame.cdata;
-    close(fig);
 end
 
 %% --- Helper: Compute disk centers along spline ---

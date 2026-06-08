@@ -1,4 +1,8 @@
-function [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(stlFileName, resolution, x_query, y_query, Int_method)
+function [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(stlFileName, resolution, x_query, y_query, Int_method, generateImage)
+
+    if nargin < 6
+        generateImage = true;
+    end
     % GenerateTerrainFromSTL Processes an STL file to generate a surface with specified resolution.
     %
     %   [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(stlFileName, resolution, x_query, y_query, Int_method)
@@ -55,21 +59,27 @@ function [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(s
     % Interpolate at query points
     z_query = interp2(XI, YI, ZI, x_query, y_query);
 
-    % === Visualization ===
-    fig = figure('Visible', 'off', 'Color', 'white');
-    hold on;
+    if generateImage
+        % === Visualization ===
+        fig = figure('Visible', 'off', 'Color', 'white');
+        hold on;
 
-    % Use full grids for surf (more robust)
-    surf(XI, YI, ZI, 'EdgeColor', 'none', 'LineStyle', 'none');
-    axis equal;
-    axis off;
-    view(45, 35.26);
+        % Use full grids for surf (more robust)
+        surf(XI, YI, ZI, 'EdgeColor', 'none', 'LineStyle', 'none');
+        axis equal;
+        axis off;
+        view(45, 35.26);
 
-    % Plot query points
-    plot3(x_query, y_query, z_query, 'ro', 'MarkerSize', 12, 'MarkerFaceColor', 'r');
+        % Plot query points
+        plot3(x_query, y_query, z_query, 'ro', 'MarkerSize', 12, 'MarkerFaceColor', 'r');
 
-    % Capture image
-    frame = getframe(fig);
-    imageMatrix = frame.cdata;
-    close(fig);
+        % Capture image
+        frame = getframe(fig);
+        imageMatrix = frame.cdata;
+        close(fig);
+    else
+        if ~exist('imageMatrix','var')
+            imageMatrix = [];
+        end
+    end
 end
