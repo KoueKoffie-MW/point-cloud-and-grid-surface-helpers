@@ -1,61 +1,61 @@
-function [imageMatrix, xi, yi, ZI, z_query] = GenerateTerrainFromTIFF(stlFileName, resolution, x_query, y_query)
-    % GenerateTerrainFromTIFF Processes an Local TIFF file to generate a surface object. with specified resolution.
+function [imageMatrix, xi, yi, ZI, z_query] = GenerateTerrainFromTIFF(tiffFileName, resolution, x_query, y_query)
+    % GenerateTerrainFromTIFF Processes a TIFF file (e.g. DEM) to generate a surface.
     %
-    %   [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromTIFF(stlFileName, resolution, x_query, y_query)
+    %   [imageMatrix, xi, yi, ZI, z_query] = GenerateTerrainFromTIFF(tiffFileName, resolution, x_query, y_query)
     %
     % Inputs:
-    %   stlFileName - Name of the TIFF file to be read.
-    %   resolution  - Tiff File resolution resolution in meters.
-    %   x_query     - x-coordinates for querying z-heights.
-    %   y_query     - y-coordinates for querying z-heights.
+    %   tiffFileName - Name of the TIFF file to be read.
+    %   resolution   - Desired grid resolution in meters.
+    %   x_query      - x-coordinates for querying z-heights.
+    %   y_query      - y-coordinates for querying z-heights.
     %
     % Outputs:
-    %   imageMatrix - Mask Image
-    %   xi, yi      - Grid vectors for the x and y axes.
-    %   ZI          - Interpolated Z data.
-    %   Res_orig    - Original resolution of the STL data.
-    %   z_query     - Interpolated z-heights at the query points.
-    
-    % Read the TIFF data
-    TIFF_data = double(imread(stlFileName));
-    %remove the offset - can be masked to a CHOICE
-    ZI = TIFF_data - min(TIFF_data,[],"all");
-    ZI = rot90(ZI,-1);
-    
-    % Create grid vectors based on the desired resolution
-    xi = 1:size(ZI,1)*resolution;
-    yi = resolution:resolution:width(TIFF_data)*resolution;
+    %   imageMatrix - RGB image of the surface visualization
+    %   xi, yi      - Grid vectors for the x and y axes
+    %   ZI          - Interpolated Z data (surface heights)
+    %   z_query     - Interpolated z-heights at the query points
 
-    % Create a meshgrid for interpolation
+    % Read the TIFF data
+    TIFF_data = double(imread(tiffFileName));
+
+    % Normalize heights (remove offset)
+    ZI = TIFF_data - min(TIFF_data, [], "all");
+
+    % Rotate so that the coordinate system matches typical expectations
+    ZI = rot90(ZI, -1);
+
+    [nRows, nCols] = size(ZI);
+
+    % Create properly spaced grid vectors
+    xi = (0:nCols-1) * resolution;
+    yi = (0:nRows-1) * resolution;
+
+    % Create meshgrid for interpolation and plotting
     [XI, YI] = meshgrid(xi, yi);
-    
-    ZI(isnan(ZI)) = 0; % Replace all NaN with 0
-    
-    % Interpolate the z-heights at the query points
+
+    % Replace any remaining NaNs with 0
+    ZI(isnan(ZI)) = 0;
+
+    % Interpolate z-heights at the query points
     z_query = interp2(XI, YI, ZI, x_query, y_query);
-    
-    % Create the figure and plot the point cloud
-    fig = figure('Visible', 'off', 'Color', 'white'); % Set figure background color to white
+
+    % === Visualization (hidden figure) ===
+    fig = figure('Visible', 'off', 'Color', 'white');
     hold on;
 
     % Plot the surface
-    surf(xi, yi, ZI, 'EdgeColor', 'none', 'LineStyle', 'none');
+    surf(XI, YI, ZI, 'EdgeColor', 'none', 'LineStyle', 'none');
     axis equal;
-    axis off; % Turn off the axes visibility
-    
-    % Set the view to isometric
+    axis off;
+
+    % Isometric view
     view(45, 35.26);
 
-    % Plot the query points as markers
-    plot3(x_query, y_query, z_query, 'ro', 'MarkerSize', 12, 'MarkerFaceColor', 'r'); % Red circles
+    % Plot query points
+    plot3(x_query, y_query, z_query, 'ro', 'MarkerSize', 12, 'MarkerFaceColor', 'r');
 
-    % Capture the figure as an image matrix
+    % Capture image
     frame = getframe(fig);
     imageMatrix = frame.cdata;
-
-    % Close the figure
     close(fig);
 end
-
-% Example usage:
-% [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL('Nordschleife_Exported_From_RoadRunner.stl', 10*100, [5, 10], [5, 10]); 
