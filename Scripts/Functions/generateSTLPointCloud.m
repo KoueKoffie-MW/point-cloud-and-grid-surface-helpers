@@ -1,4 +1,8 @@
-function [points, imageMatrix] = generateSTLPointCloud(stlFilename, totalPoints, patchColor, markerColor, STL_points)
+function [points, imageMatrix] = generateSTLPointCloud(stlFilename, totalPoints, patchColor, markerColor, STL_points, generateImage)
+
+    if nargin < 6
+        generateImage = true;
+    end
     % Generate a point cloud with evenly spaced points on the surfaces of an STL model.
     %
     % Inputs:

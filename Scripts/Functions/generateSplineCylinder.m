@@ -1,4 +1,12 @@
-function imageMatrix = generateSplineCylinder(spline_definition_points, cylinder_radius, num_cloud_points, use_smooth_spline_flag, patchColor, output_filename_base,alpha_mod)
+function imageMatrix = generateSplineCylinder(spline_definition_points, cylinder_radius, num_cloud_points, use_smooth_spline_flag, patchColor, output_filename_base, alpha_mod, createSurface, createSTL)
+
+    if nargin < 9
+        createSTL = true;
+    end
+
+    if nargin < 8
+        createSurface = true;
+    end
 % Generates a point cloud on the surface of a cylinder following a spline path.
 % Uses alphaShape for surface triangulation for visualization and STL export.
 %
@@ -59,25 +67,35 @@ for j = 1:NUM
         p1=input_points(:,segmentIndex)'; p2=input_points(:,segmentIndex+1)'; if ~(targetArcLength<=cumulativeLengths(1)||(segmentIndex==size(input_points,2)-1&&targetArcLength>=cumulativeLengths(end))); segmentLength=cumulativeLengths(segmentIndex+1)-cumulativeLengths(segmentIndex); if segmentLength>eps; localT=(targetArcLength-cumulativeLengths(segmentIndex))/segmentLength; else; localT=0; end; elseif targetArcLength<=cumulativeLengths(1); localT=0; else; localT=1; end
         pointOnSpline=(1-localT)*p1+localT*p2; direction=p2-p1;
     end
-    norm_dir=norm(direction); if norm_dir>eps; direction=direction/norm_dir; else; direction=[1,0,0]; end
-    [~,min_idx]=min(abs(direction)); temp_vec=zeros(1,3); temp_vec(min_idx)=1; orthogonal1=cross(direction,temp_vec); norm_orth1=norm(orthogonal1); if norm_orth1>eps; orthogonal1=orthogonal1/norm_orth1; else; temp_vec=zeros(1,3); temp_vec(mod(min_idx,3)+1)=1; orthogonal1=cross(direction,temp_vec); if norm(orthogonal1)>eps; orthogonal1=orthogonal1/norm(orthogonal1); else; orthogonal1=[1,0,0]; end; end; orthogonal2=cross(direction,orthogonal1);
-    theta=j*golden_angle; circlePoint=R*(cos(theta)*orthogonal1+sin(theta)*orthogonal2); pointCloud(j,:)=pointOnSpline+circlePoint;
+    [orthogonal1, orthogonal2] = getOrthogonalVectors(direction);
+    theta = j * golden_angle;
+    circlePoint = R * (cos(theta) * orthogonal1 + sin(theta) * orthogonal2);
+    pointCloud(j, :) = pointOnSpline + circlePoint;
 end
 fprintf('Finished generating points.\n');
 
 %% --- Create Alpha Shape for Surface Triangulation ---
-fprintf('Creating alpha shape from point cloud...\n');
-K_alpha = []; V_alpha = []; TR = []; % Initialize
-try
-    shp = alphaShape(pointCloud(:,1), pointCloud(:,2), pointCloud(:,3));   
-    shp = alphaShape(pointCloud(:,1), pointCloud(:,2), pointCloud(:,3),criticalAlpha(shp,'one-region')*alpha_mod);
-    fprintf(' Alpha value used: %.4f\n', shp.Alpha);
-    [K_alpha, V_alpha] = boundaryFacets(shp); % K_alpha=Faces, V_alpha=Vertices
-    fprintf(' Extracted %d boundary facets.\n', size(K_alpha, 1));
+if createSurface
+    fprintf('Creating alpha shape from point cloud...\\n');
+    K_alpha = []; V_alpha = []; TR = []; % Initialize
+    try
+        shp = alphaShape(pointCloud(:,1), pointCloud(:,2), pointCloud(:,3));   
+        shp = alphaShape(pointCloud(:,1), pointCloud(:,2), pointCloud(:,3),criticalAlpha(shp,'one-region')*alpha_mod);
+        fprintf(' Alpha value used: %.4f\\n', shp.Alpha);
+        [K_alpha, V_alpha] = boundaryFacets(shp); % K_alpha=Faces, V_alpha=Vertices
+        fprintf(' Extracted %d boundary facets.\\n', size(K_alpha, 1));
+    catch
+        warning('Alpha shape creation failed.');
+    end
+else
+    K_alpha = []; V_alpha = []; 
+end
 
     % --- Create triangulation object FOR STLWRITE ---
-    if ~isempty(K_alpha) && ~isempty(V_alpha)
+    if createSTL && ~isempty(K_alpha) && ~isempty(V_alpha)
         TR = triangulation(K_alpha, V_alpha);
+    else
+        TR = [];
     end
 catch alpha_err
     warning('Could not compute alpha shape or triangulation: %s. Surface visualization and STL export might be skipped.', alpha_err.message);
@@ -190,7 +208,9 @@ if ~isempty(TR)
         stlFilename = fullfile(outputDir, output_filename_base);
         try
             % Use MATLAB's built-in stlwrite with the triangulation object
-            stlwrite(TR, stlFilename); % Default is binary format
+            if createSTL
+                stlwrite(TR, stlFilename); % Default is binary format
+            end
             % For text format use: stlwrite(TR, stlFilename, 'text');
             fprintf('STL file saved to: %s\n', stlFilename);
         catch stl_err
@@ -204,3 +224,34 @@ end
 fprintf('Function execution finished.\n');
 
 end % End of function
+%% --- Helper: Get two perpendicular vectors to a direction ---
+function [orthogonal1, orthogonal2] = getOrthogonalVectors(direction)
+    norm_dir = norm(direction);
+    if norm_dir > eps
+        direction = direction / norm_dir;
+    else
+        direction = [1, 0, 0];
+    end
+
+    [~, min_idx] = min(abs(direction));
+    temp_vec = zeros(1, 3);
+    temp_vec(min_idx) = 1;
+
+    orthogonal1 = cross(direction, temp_vec);
+    norm_orth1 = norm(orthogonal1);
+
+    if norm_orth1 > eps
+        orthogonal1 = orthogonal1 / norm_orth1;
+    else
+        temp_vec = zeros(1, 3);
+        temp_vec(mod(min_idx, 3) + 1) = 1;
+        orthogonal1 = cross(direction, temp_vec);
+        if norm(orthogonal1) > eps
+            orthogonal1 = orthogonal1 / norm(orthogonal1);
+        else
+            orthogonal1 = [1, 0, 0];
+        end
+    end
+
+    orthogonal2 = cross(direction, orthogonal1);
+end

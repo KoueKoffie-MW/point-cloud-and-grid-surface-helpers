@@ -1,4 +1,8 @@
-function [points, imageMatrix] = generateCylinderPointCloudFibonacci(radius, height, numPoints, numCircumferencePoints, numFacePoints, patchColor, markerColor, filename)
+function [points, imageMatrix] = generateCylinderPointCloudFibonacci(radius, height, numPoints, numCircumferencePoints, numFacePoints, patchColor, markerColor, generateImage)
+
+    if nargin < 8
+        generateImage = true;
+    end
     % Generate a point cloud with equally spaced, unique points on the surface of a cylinder using the Fibonacci lattice method.
     %
     % Inputs:

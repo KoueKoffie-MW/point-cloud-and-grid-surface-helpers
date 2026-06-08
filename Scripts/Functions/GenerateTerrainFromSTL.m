@@ -53,7 +53,8 @@ function [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(s
     [XI, YI] = meshgrid(xi, yi);
 
     % Interpolate Z data
-    ZI = griddata(x_filtered, y_filtered, z_filtered, XI, YI, Int_method);
+    F = scatteredInterpolant(x_filtered, y_filtered, z_filtered, Int_method);
+    ZI = F(XI, YI);
     ZI(isnan(ZI)) = 0;
 
     % Interpolate at query points

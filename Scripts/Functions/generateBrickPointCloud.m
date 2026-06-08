@@ -1,4 +1,8 @@
-function [points, imageMatrix] = generateBrickPointCloud(length, width, height, numDivisionsLength, numDivisionsWidth, numDivisionsHeight, patchColor, markerColor)
+function [points, imageMatrix] = generateBrickPointCloud(length, width, height, numDivisionsLength, numDivisionsWidth, numDivisionsHeight, patchColor, markerColor, generateImage)
+
+    if nargin < 9
+        generateImage = true;
+    end
     % Generate a point cloud with equally spaced, unique points on the surface of a brick.
     %
     % Inputs:

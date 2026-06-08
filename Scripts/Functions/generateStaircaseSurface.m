@@ -1,4 +1,8 @@
-function [X_grid_vector, Y_grid_vector, Z_heights, imageMatrix, x, z] = generateStaircaseSurface(nSteps, Tread, NosingProtusion, Riser, yWidth, input_angle_degrees, markerColor, patchColor)
+function [X_grid_vector, Y_grid_vector, Z_heights, imageMatrix, x, z] = generateStaircaseSurface(nSteps, Tread, NosingProtusion, Riser, yWidth, input_angle_degrees, markerColor, patchColor, generateImage)
+
+    if nargin < 9
+        generateImage = true;
+    end
     % Convert the input angle to radians
     input_angle_radians = deg2rad(input_angle_degrees);
 

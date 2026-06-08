@@ -1,4 +1,8 @@
-function [points, imageMatrix] = generateSTLPointCloudRandom(stlFilename, totalPoints, patchColor, markerColor, STL_points, numPoints)
+function [points, imageMatrix] = generateSTLPointCloudRandom(stlFilename, totalPoints, patchColor, markerColor, STL_points, numPoints2, generateImage)
+
+    if nargin < 7
+        generateImage = true;
+    end
     % Generate a point cloud with randomly spaced points on the surfaces of an STL model.
     %
     % Inputs:

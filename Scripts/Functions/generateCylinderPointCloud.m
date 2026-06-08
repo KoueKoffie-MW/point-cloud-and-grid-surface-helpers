@@ -1,4 +1,8 @@
-function [points, imageMatrix] = generateCylinderPointCloud(radius, height, numRadialDivisions, numHeightDivisions, numFaceRadialDivisions, numFaceAngularDivisions, angularOffset, faceAngularOffset, patchColor, markerColor)
+function [points, imageMatrix] = generateCylinderPointCloud(radius, height, numRadialDivisions, numHeightDivisions, numFaceRadialDivisions, numFaceAngularDivisions, angularOffset, faceAngularOffset, patchColor, markerColor, generateImage)
+
+    if nargin < 11
+        generateImage = true;
+    end
     % Generate a point cloud with equally spaced, unique points on the surface of a cylinder.
     %
     % Inputs:
