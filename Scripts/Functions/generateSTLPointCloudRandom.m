@@ -1,4 +1,4 @@
-function [points, imageMatrix] = generateSTLPointCloudRandom(stlFilename, totalPoints, patchColor, markerColor, STL_points, numPoints2, generateImage)
+function [points, imageMatrix] = generateSTLPointCloudRandom(stlFilename, totalPoints, patchColor, markerColor, STL_points, numPoints, generateImage)
 
     if nargin < 7
         generateImage = true;

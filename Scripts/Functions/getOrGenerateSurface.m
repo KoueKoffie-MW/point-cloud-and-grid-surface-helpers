@@ -1,5 +1,9 @@
 function result = getOrGenerateSurface(generatorFunc, args, cacheDir, forceRegen)
 % getOrGenerateSurface  Persistent .mat caching for expensive surface generation.
+ 
+% NOTE: This function uses traditional nargin-style input validation
+% instead of the 'arguments' block because it may be called
+% from Simulink mask initialization in some workflows.
 %
 %   result = getOrGenerateSurface(generatorFunc, args, cacheDir, forceRegen)
 %

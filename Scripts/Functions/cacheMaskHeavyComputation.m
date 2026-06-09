@@ -1,5 +1,10 @@
 function [shouldCompute, cachedData] = cacheMaskHeavyComputation(varargin)
 % cacheMaskHeavyComputation  Smart caching for expensive mask initialization code.
+ 
+% NOTE: This function uses traditional nargin-style input validation
+% instead of the 'arguments' block because it is intended to be called
+% from Simulink mask initialization, which has limited support for the
+% modern arguments block with validation attributes.
 %
 %   [shouldCompute, cachedData] = cacheMaskHeavyComputation('Param1', value1, 'Param2', value2, ...)
 %

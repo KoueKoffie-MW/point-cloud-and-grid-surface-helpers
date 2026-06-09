@@ -3,16 +3,19 @@ function [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(s
     if nargin < 6
         generateImage = true;
     end
+
     % GenerateTerrainFromSTL Processes an STL file to generate a surface with specified resolution.
     %
-    %   [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(stlFileName, resolution, x_query, y_query, Int_method)
+    %   [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(stlFileName, resolution, x_query, y_query, Int_method, generateImage)
     %
     % Inputs:
     %   stlFileName - Name of the STL file to be read.
     %   resolution  - Desired resolution in meters.
     %   x_query     - x-coordinates for querying z-heights.
     %   y_query     - y-coordinates for querying z-heights.
-    %   Int_method  - Interpolation method for griddata ('linear', 'nearest', 'natural', 'cubic', 'v4')
+    %   Int_method  - Interpolation method ('linear', 'nearest', 'natural', 'cubic', 'v4')
+    %                 Note: 'cubic' and 'v4' (bi-harmonic) are slower as they fall back to griddata.
+    %   generateImage - If false, skips figure creation (default = true)
     %
     % Outputs:
     %   imageMatrix - RGB image of the surface visualization
@@ -53,9 +56,16 @@ function [imageMatrix, xi, yi, ZI, Res_orig, z_query] = GenerateTerrainFromSTL(s
     [XI, YI] = meshgrid(xi, yi);
 
     % Interpolate Z data
-    F = scatteredInterpolant(x_filtered, y_filtered, z_filtered, Int_method);
-    ZI = F(XI, YI);
-    ZI(isnan(ZI)) = 0;
+    if ismember(Int_method, {'cubic','v4'})
+        % These methods are only supported by griddata (slower)
+        ZI = griddata(x_filtered, y_filtered, z_filtered, XI, YI, Int_method);
+    else
+        % Faster path using scatteredInterpolant
+        F = scatteredInterpolant(x_filtered, y_filtered, z_filtered, Int_method);
+        ZI = F(XI, YI);
+    end
+
+    ZI(isnan(ZI)) = 0; % Replace all NaN with 0
 
     % Interpolate at query points
     z_query = interp2(XI, YI, ZI, x_query, y_query);
